@@ -199,9 +199,12 @@ if [ $FWTYPE == "dynamic" ]; then
         if [[ ${#DYLIBS[@]} -gt 0 && -e ${DYLIBS[0]} ]]; then
             echo "Creating framework for $SYS"
             mkdir -p $FWDIR/Headers
+            mkdir -p $FWDIR/Modules
             lipo -create ${DYLIBS[@]} -output $FWDIR/$FWNAME
             cp -r include/$FWNAME/* $FWDIR/Headers/
             cp -L assets/$SYS/Info.plist $FWDIR/Info.plist
+            cp -L assets/$SYS/openssl.h $FWDIR/Headers/openssl.h
+            cp -L assets/$SYS/module.modulemap $FWDIR/Modules/module.modulemap
             MIN_SDK_VERSION=$(get_min_sdk "$FWDIR/$FWNAME")
             OPENSSL_VERSION=$(get_openssl_version "$FWDIR/Headers/opensslv.h")
             sed -e "s/\\\$(MIN_SDK_VERSION)/$MIN_SDK_VERSION/g" \
@@ -236,8 +239,11 @@ else
             cp -r $FWDIR/lib $LBDIR/
             rm -rf $FWDIR/lib
             mkdir -p $FWDIR/Headers
+            mkdir -p $FWDIR/Modules
             cp -r include/$FWNAME/* $FWDIR/Headers/
             cp -L assets/$SYS/Info.plist $FWDIR/Info.plist
+            cp -L assets/$SYS/openssl.h $FWDIR/Headers/openssl.h
+            cp -L assets/$SYS/module.modulemap $FWDIR/Modules/module.modulemap
             MIN_SDK_VERSION=$(get_min_sdk "$FWDIR/$FWNAME")
             OPENSSL_VERSION=$(get_openssl_version "$FWDIR/Headers/opensslv.h")
             sed -e "s/\\\$(MIN_SDK_VERSION)/$MIN_SDK_VERSION/g" \
@@ -264,12 +270,13 @@ for SYS in ${ALL_SYSTEMS[@]}; do
         mkdir "Versions"
         mkdir "Versions/A"
         mkdir "Versions/A/Resources"
-        mv "openssl" "Headers" "Versions/A"
+        mv "openssl" "Modules" "Headers" "Versions/A"
         mv "Info.plist" "Versions/A/Resources"
 
         (cd "Versions" && ln -s "A" "Current")
         ln -s "Versions/Current/openssl"
         ln -s "Versions/Current/Headers"
+        ln -s "Versions/Current/Modules"
         ln -s "Versions/Current/Resources"
 
         cd ../../../..

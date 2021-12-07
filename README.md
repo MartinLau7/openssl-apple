@@ -9,7 +9,7 @@
 [![license](https://img.shields.io/badge/license-Apache%202.0-lightgrey.svg)](LICENSE)
 [![CI](https://github.com/MartinLau7/openssl-apple/actions/workflows/build.yml/badge.svg)](https://github.com/MartinLau7/openssl-apple/actions/workflows/build.yml)
 
-This is a fork of the popular work by [Felix Schulze](https://github.com/x2on), that is a set of scripts for using self-compiled builds of the OpenSSL library on the iPhone and the Apple TV.
+This is a fork of the popular work by [YURY/OPENSSL-APPLE](https://github.com/yury/openssl-apple.git), that is a set of scripts for using self-compiled builds of the OpenSSL library on the iPhone and the Apple TV.
 
 However, this repository focuses more on framework-based setups and also adds macOS and watchOS support.
 
