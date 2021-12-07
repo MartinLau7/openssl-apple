@@ -50,9 +50,9 @@ tvos-sim-cross-x86_64 tvos64-cross-arm64
 TARGETS`
 
 # Minimum iOS/tvOS SDK version to build for
-IOS_MIN_SDK_VERSION="14.0"
-MACOS_MIN_SDK_VERSION="11.0"
-CATALYST_MIN_SDK_VERSION="11.0"
+IOS_MIN_SDK_VERSION="12.0"
+MACOS_MIN_SDK_VERSION="10.15"
+CATALYST_MIN_SDK_VERSION="10.15"
 WATCHOS_MIN_SDK_VERSION="6.0"
 TVOS_MIN_SDK_VERSION="14.0"
 
@@ -219,6 +219,9 @@ finish_build_loop()
     LIBCRYPTO_MACOS+=("${TARGETDIR}/lib/libcrypto.a")
     OPENSSLCONF_SUFFIX="macos_${ARCH}"
   fi
+
+  # Copy headers
+  cp -f "${CURRENTPATH}/shim/shim.h" "${TARGETDIR}/include/openssl/shim.h"
 
   # Copy opensslconf.h to bin directory and add to array
   OPENSSLCONF="opensslconf_${OPENSSLCONF_SUFFIX}.h"
