@@ -220,9 +220,6 @@ finish_build_loop()
     OPENSSLCONF_SUFFIX="macos_${ARCH}"
   fi
 
-  # Copy headers
-  cp -f "${CURRENTPATH}/shim/shim.h" "${TARGETDIR}/include/openssl/shim.h"
-
   # Copy opensslconf.h to bin directory and add to array
   OPENSSLCONF="opensslconf_${OPENSSLCONF_SUFFIX}.h"
   cp "${TARGETDIR}/include/openssl/opensslconf.h" "${CURRENTPATH}/bin/${OPENSSLCONF}"

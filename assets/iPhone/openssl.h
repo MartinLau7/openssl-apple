@@ -87,7 +87,6 @@
 #include <openssl/safestack.h>
 #include <openssl/seed.h>
 #include <openssl/sha.h>
-#include <openssl/shim.h>
 #include <openssl/srp.h>
 #include <openssl/srtp.h>
 #include <openssl/stack.h>
