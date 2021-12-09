@@ -3,6 +3,8 @@ import FMake
 
 OutputLevel.default = .error
 
+print("building openssl - static")
+
 try sh("./build-libssl.sh")
 
 try sh("./create-openssl-framework.sh static")
@@ -10,6 +12,8 @@ try sh("./create-openssl-framework.sh static")
 try cd("xcframeworks/static") {
     try sh("zip --symlinks -r ../../openssl-static.xcframework.zip openssl.xcframework")
 }
+
+print("building openssl - dynamic")
 
 try sh("zip --symlinks -r openssl-libs.zip libs")
 
