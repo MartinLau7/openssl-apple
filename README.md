@@ -6,8 +6,8 @@
 ![watchOS support](https://img.shields.io/badge/watchOS-7.0+-blue.svg)
 ![tvOS support](https://img.shields.io/badge/tvOS-14+-blue.svg)
 ![OpenSSL version](https://img.shields.io/badge/OpenSSL-1.1.1l-green.svg)
+[![CI](https://github.com/MartinLau7/openssl-apple/actions/workflows/release.yml/badge.svg)](https://github.com/MartinLau7/openssl-apple/actions/workflows/release.yml)
 [![license](https://img.shields.io/badge/license-Apache%202.0-lightgrey.svg)](LICENSE)
-[![CI](https://github.com/MartinLau7/openssl-apple/actions/workflows/build.yml/badge.svg)](https://github.com/MartinLau7/openssl-apple/actions/workflows/build.yml)
 
 This is a fork of the popular work by [YURY/OPENSSL-APPLE](https://github.com/yury/openssl-apple.git), that is a set of scripts for using self-compiled builds of the OpenSSL library on the iPhone and the Apple TV.
 
