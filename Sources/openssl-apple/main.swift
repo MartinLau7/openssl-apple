@@ -5,8 +5,6 @@ OutputLevel.default = .error
 
 print("building openssl - static")
 
-try sh("export OPENSSL_TARGETS='ios-sim-cross-x86_64 ios-sim-cross-arm64 ios64-cross-arm64 ios64-cross-arm64e macos64-x86_64 macos64-arm64 mac-catalyst-x86_64 mac-catalyst-arm64'")
-
 try sh(#"./build-libssl.sh --targets="$OPENSSL_TARGETS" --disable-bitcode"#)
 
 try sh("./create-openssl-framework.sh static")
@@ -35,14 +33,17 @@ try cd("frameworks/dynamic") {
 
 let releaseMD =
   """
-
+    ### XCFrameworks
     | File                            | SHA 256                                             |
     | ------------------------------- |:---------------------------------------------------:|
     | openssl-static.xcframework.zip  | \(try sha(path: "openssl-static.xcframework.zip"))  |
     | openssl-dynamic.xcframework.zip | \(try sha(path: "openssl-dynamic.xcframework.zip")) |
+
+    ### Frameworks
+    | File                            | SHA 256                                             |
+    | ------------------------------- |:---------------------------------------------------:|
     | openssl-static.frameworks.zip   | \(try sha(path: "openssl-static.frameworks.zip"))   |
     | openssl-dynamic.frameworks.zip  | \(try sha(path: "openssl-dynamic.frameworks.zip"))  |
-
   """
 
 try write(content: releaseMD, atPath: "release.md")
