@@ -3,85 +3,87 @@ name: CI
 on:
   push:
     tags:
-    - 'v*'
+      - "v*"
 
 jobs:
   build:
     name: Building release assets
-    runs-on: macOS-latest
+    runs-on: macos-12
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: xcode-select
-      run: sudo xcode-select --switch /Applications/Xcode.app
+      - name: xcode-select
+        run: sudo xcode-select --switch /Applications/Xcode.app
 
-    - name: build-openssl
-      run: swift run
+      - name: build-openssl
+        env:
+          OPENSSL_TARGETS: "ios-sim-cross-x86_64 ios-sim-cross-arm64 ios64-cross-arm64 ios64-cross-arm64e macos64-x86_64 macos64-arm64 mac-catalyst-x86_64 mac-catalyst-arm64"
+        run: swift run
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: openssl-apple ${{ github.ref }} Release
-        body_path: release.md
-        draft: false
-        prerelease: false
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: openssl-apple ${{ github.ref }} Release
+          body_path: release.md
+          draft: false
+          prerelease: false
 
-    - name: Upload Release Asset Dynamic
-      id: upload-release-asset-dynamic
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./openssl-dynamic.xcframework.zip
-        asset_name: openssl-dynamic.xcframework.zip
-        asset_content_type: application/zip
+      - name: Upload Release Asset Dynamic
+        id: upload-release-asset-dynamic
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./openssl-dynamic.xcframework.zip
+          asset_name: openssl-dynamic.xcframework.zip
+          asset_content_type: application/zip
 
-    - name: Upload Release Asset Static
-      id: upload-release-asset-static 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./openssl-static.xcframework.zip
-        asset_name: openssl-static.xcframework.zip
-        asset_content_type: application/zip
+      - name: Upload Release Asset Static
+        id: upload-release-asset-static
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./openssl-static.xcframework.zip
+          asset_name: openssl-static.xcframework.zip
+          asset_content_type: application/zip
 
-    - name: Upload Libs
-      id: upload-release-asset-libs 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./openssl-libs.zip
-        asset_name: openssl-libs.zip
-        asset_content_type: application/zip
+      - name: Upload Libs
+        id: upload-release-asset-libs
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./openssl-libs.zip
+          asset_name: openssl-libs.zip
+          asset_content_type: application/zip
 
-    - name: Upload Dynamic Frameworks
-      id: upload-release-asset-dynamic-frameworks
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./openssl-dynamic.frameworks.zip
-        asset_name: openssl-dynamic.frameworks.zip
-        asset_content_type: application/zip
+      - name: Upload Dynamic Frameworks
+        id: upload-release-asset-dynamic-frameworks
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./openssl-dynamic.frameworks.zip
+          asset_name: openssl-dynamic.frameworks.zip
+          asset_content_type: application/zip
 
-    - name: Upload Static Frameworks
-      id: upload-release-asset-static-frameworkds
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./openssl-static.frameworks.zip
-        asset_name: openssl-static.frameworks.zip
-        asset_content_type: application/zip
+      - name: Upload Static Frameworks
+        id: upload-release-asset-static-frameworkds
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./openssl-static.frameworks.zip
+          asset_name: openssl-static.frameworks.zip
+          asset_content_type: application/zip

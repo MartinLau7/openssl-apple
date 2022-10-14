@@ -1,4 +1,5 @@
 #!/bin/bash
+source scripts/get-openssl-version.sh
 
 set -euo pipefail
 
@@ -28,10 +29,12 @@ if [ -d $LBROOT ]; then
     rm -rf $LBROOT
 fi
 
+#ALL_SYSTEMS=("iPhone" "AppleTV" "MacOSX" "Catalyst" "Watch")
 ALL_SYSTEMS=("iPhoneOS" "iPhoneSimulator" "AppleTVOS" "AppleTVSimulator" "MacOSX" "Catalyst" "WatchOS" "WatchSimulator")
 
 function check_bitcode() {
     local FWDIR=$1
+    local IS_VERBOSE=$2
 
     if [[ $FWTYPE == "dynamic" ]]; then
         BITCODE_PATTERN="__LLVM"
@@ -40,9 +43,15 @@ function check_bitcode() {
     fi
 
     if otool -l "$FWDIR/$FWNAME" | grep "${BITCODE_PATTERN}" >/dev/null; then
-        echo "INFO: $FWDIR contains Bitcode"
+        if $IS_VERBOSE; then
+            echo "INFO: $FWDIR contains Bitcode"
+        fi
+        BITCODE_ENABLED=1
     else
-        echo "INFO: $FWDIR doesn't contain Bitcode"
+        if $IS_VERBOSE; then
+            echo "INFO: $FWDIR doesn't contain Bitcode"
+        fi
+        BITCODE_ENABLED=0
     fi
 }
 
@@ -110,7 +119,7 @@ function get_min_sdk() {
 #   'g' = 103 -> 6 + 1 = 07 (zero-padded)
 #   1.1.107
 #
-function get_openssl_version() {
+function get_openssl_version_from_file() {
     local opensslv=$1
     local std_version=$(awk '/define OPENSSL_VERSION_TEXT/ && !/-fips/ {print $5}' "$opensslv")
     local generic_version=${std_version%?}
@@ -147,7 +156,7 @@ if [ $FWTYPE == "dynamic" ]; then
         elif [[ $PLATFORM == MacOSX* ]]; then
             MIN_SDK="-macosx_version_min $MIN_SDK_VERSION"
         elif [[ $PLATFORM == Catalyst* ]]; then
-            MIN_SDK="-platform_version mac-catalyst 14.0 $MIN_SDK_VERSION"
+            MIN_SDK="-platform_version mac-catalyst $MIN_SDK_VERSION $MIN_SDK_VERSION"
             PLATFORM="MacOSX"
         elif [[ $PLATFORM == iPhoneSimulator* ]]; then
             MIN_SDK="-ios_simulator_version_min $MIN_SDK_VERSION"
@@ -174,9 +183,15 @@ if [ $FWTYPE == "dynamic" ]; then
         ar -x ../lib/libssl.a
         cd ..
 
+        BUNDLE_BITCODE=""
+        check_bitcode "lib/libssl.a" false
+        if [[ $BITCODE_ENABLED == 1 ]]; then
+            BUNDLE_BITCODE="-bitcode_bundle"
+        fi
+
         ld obj/*.o \
             -dylib \
-            -bitcode_bundle \
+            $BUNDLE_BITCODE \
             -lSystem \
             -arch $ARCH \
             $MIN_SDK \
@@ -199,19 +214,16 @@ if [ $FWTYPE == "dynamic" ]; then
         if [[ ${#DYLIBS[@]} -gt 0 && -e ${DYLIBS[0]} ]]; then
             echo "Creating framework for $SYS"
             mkdir -p $FWDIR/Headers
-            mkdir -p $FWDIR/Modules
             lipo -create ${DYLIBS[@]} -output $FWDIR/$FWNAME
             cp -r include/$FWNAME/* $FWDIR/Headers/
             cp -L assets/$SYS/Info.plist $FWDIR/Info.plist
-            cp -L assets/$SYS/openssl.h $FWDIR/Headers/openssl.h
-            cp -L assets/$SYS/module.modulemap $FWDIR/Modules/module.modulemap
             MIN_SDK_VERSION=$(get_min_sdk "$FWDIR/$FWNAME")
-            OPENSSL_VERSION=$(get_openssl_version "$FWDIR/Headers/opensslv.h")
+            OPENSSL_VERSION=$(get_openssl_version_from_file "$FWDIR/Headers/opensslv.h")
             sed -e "s/\\\$(MIN_SDK_VERSION)/$MIN_SDK_VERSION/g" \
                 -e "s/\\\$(OPENSSL_VERSION)/$OPENSSL_VERSION/g" \
                 -i '' "$FWDIR/Info.plist"
             echo "Created $FWDIR"
-            check_bitcode $FWDIR
+            check_bitcode "$FWDIR" true
         else
             echo "Skipped framework for $SYS"
         fi
@@ -239,25 +251,22 @@ else
             cp -r $FWDIR/lib $LBDIR/
             rm -rf $FWDIR/lib
             mkdir -p $FWDIR/Headers
-            mkdir -p $FWDIR/Modules
             cp -r include/$FWNAME/* $FWDIR/Headers/
             cp -L assets/$SYS/Info.plist $FWDIR/Info.plist
-            cp -L assets/$SYS/openssl.h $FWDIR/Headers/openssl.h
-            cp -L assets/$SYS/module.modulemap $FWDIR/Modules/module.modulemap
             MIN_SDK_VERSION=$(get_min_sdk "$FWDIR/$FWNAME")
-            OPENSSL_VERSION=$(get_openssl_version "$FWDIR/Headers/opensslv.h")
+            OPENSSL_VERSION=$(get_openssl_version_from_file "$FWDIR/Headers/opensslv.h")
             sed -e "s/\\\$(MIN_SDK_VERSION)/$MIN_SDK_VERSION/g" \
                 -e "s/\\\$(OPENSSL_VERSION)/$OPENSSL_VERSION/g" \
                 -i '' "$FWDIR/Info.plist"
             echo "Created $FWDIR"
-            check_bitcode $FWDIR
+            check_bitcode "$FWDIR" true
         else
             echo "Skipped framework for $SYS"
         fi
     done
 fi
 
-# macOS and catalyst symlinks
+# macOS and Catalyst symlinks
 for SYS in ${ALL_SYSTEMS[@]}; do
     if [[ $SYS == "MacOSX" || $SYS == "Catalyst" ]]; then
         SYSDIR="$FWROOT/$SYS"
@@ -270,13 +279,12 @@ for SYS in ${ALL_SYSTEMS[@]}; do
         mkdir "Versions"
         mkdir "Versions/A"
         mkdir "Versions/A/Resources"
-        mv "openssl" "Modules" "Headers" "Versions/A"
+        mv "openssl" "Headers" "Versions/A"
         mv "Info.plist" "Versions/A/Resources"
 
         (cd "Versions" && ln -s "A" "Current")
         ln -s "Versions/Current/openssl"
         ln -s "Versions/Current/Headers"
-        ln -s "Versions/Current/Modules"
         ln -s "Versions/Current/Resources"
 
         cd ../../../..
@@ -285,7 +293,6 @@ done
 
 build_xcframework() {
     rm -rf "$XCFWROOT/$FWNAME.xcframework"
-
     local FRAMEWORKS=($FWROOT/*/$FWNAME.framework)
     local ARGS=
     for ARG in ${FRAMEWORKS[@]}; do
