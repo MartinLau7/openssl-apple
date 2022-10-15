@@ -122,11 +122,7 @@ function get_min_sdk() {
 function get_openssl_version_from_file() {
     local opensslv=$1
     local std_version=$(awk '/define OPENSSL_VERSION_TEXT/ && !/-fips/ {print $5}' "$opensslv")
-    local generic_version=${std_version%?}
-    local subpatch=${std_version: -1}
-    local subpatch_number=$(($(printf '%d' \'$subpatch) - 97 + 1))
-    local normalized_version="${generic_version}$(printf '%02d' $subpatch_number)"
-    echo $normalized_version
+    echo $(get_openssl_version $std_version)
 }
 
 if [ $FWTYPE == "dynamic" ]; then
@@ -293,6 +289,7 @@ done
 
 build_xcframework() {
     rm -rf "$XCFWROOT/$FWNAME.xcframework"
+
     local FRAMEWORKS=($FWROOT/*/$FWNAME.framework)
     local ARGS=
     for ARG in ${FRAMEWORKS[@]}; do
