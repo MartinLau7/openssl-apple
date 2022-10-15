@@ -33,6 +33,14 @@ DEFAULTVERSION="1.1.1q"
 NODE_CONFIG_OPTIONS="no-comp no-shared enable-ssl-trace"
 
 # Default (=full) set of targets (OpenSSL >= 1.1.1) to build
+#DEFAULTTARGETS=`cat <<TARGETS
+#ios-sim-cross-x86_64 ios-sim-cross-arm64 ios64-cross-arm64 ios64-cross-arm64e
+#macos64-x86_64 macos64-arm64
+#mac-catalyst-x86_64 mac-catalyst-arm64
+#watchos-cross-armv7k watchos-cross-arm64_32 watchos-sim-cross-x86_64 watchos-sim-cross-i386
+#tvos-sim-cross-x86_64 tvos64-cross-arm64
+#TARGETS`
+
 DEFAULTTARGETS=`cat <<TARGETS
 ios-sim-cross-x86_64 ios-sim-cross-arm64 ios64-cross-arm64 ios64-cross-arm64e
 macos64-x86_64 macos64-arm64
@@ -70,6 +78,7 @@ echo_help()
   echo "     --min-watchos-sdk=SDKVERSION  Set minimum watchOS SDK version (default: $WATCHOS_MIN_SDK_VERSION)"
   echo "     --min-tvos-sdk=SDKVERSION     Set minimum tvOS SDK version (default: $TVOS_MIN_SDK_VERSION)"
   echo "     --noparallel                  Disable running make with parallel jobs (make -j)"
+  echo "     --disable-bitcode             Disable embedding Bitcode"
   echo " -v, --verbose                     Enable verbose logging"
   echo "     --verbose-on-error            Dump last 500 lines from log file if an error occurs (for Travis builds)"
   echo "     --version=VERSION             OpenSSL version to build (defaults to ${DEFAULTVERSION})"
@@ -220,20 +229,6 @@ finish_build_loop()
   if [ -z "${INCLUDE_DIR}" ]; then
     INCLUDE_DIR="${TARGETDIR}/include/openssl"
   fi
-}
-
-gpg_validate()
-{
-  local TARGET=$1
-  local SIG=${2:-${TARGET}.asc}
-
-  GPG_B=$(which gpg)
-  if [ ! -x "${GPG_B}" ]; then
-    echo "WARN: No gpg executable found in PATH. Please consider installing gpg so archive signature validation can proceed."
-    return 1
-  fi
-
-  $GPG_B --keyserver keys.openpgp.org --keyserver-options auto-key-retrieve,include-subkeys --verify-options show-photos --verify "${SIG}" "${TARGET}"
 }
 
 # Init optional command line vars
@@ -493,21 +488,9 @@ if [ ! -e ${OPENSSL_ARCHIVE_FILE_NAME} ]; then
   # Archive was found, so proceed with download.
   # -O Use server-specified filename for download
   curl ${CURL_OPTIONS} -O "${OPENSSL_ARCHIVE_URL}"
-  # also download the gpg signature from the same location
-  curl ${CURL_OPTIONS} -O "${OPENSSL_ARCHIVE_URL}${OPENSSL_ARCHIVE_SIGNATURE_FILE_EXT}"
 
 else
   echo "Using ${OPENSSL_ARCHIVE_FILE_NAME}"
-fi
-
-# Validate archive signature
-if [ -e ${OPENSSL_ARCHIVE_SIGNATURE_FILE_NAME} ]; then
-  gpg_validate "${OPENSSL_ARCHIVE_FILE_NAME}" "${OPENSSL_ARCHIVE_SIGNATURE_FILE_NAME}"
-  if [ $? -ne 0 ]; then
-    echo "WARN: GPG signature validation was unsuccessful."
-  fi
-else
-  echo "WARN: No GPG signature validation performed. (missing ${OPENSSL_ARCHIVE_SIGNATURE_FILE_NAME})"
 fi
 
 # Set reference to custom configuration (OpenSSL 1.1.1)
