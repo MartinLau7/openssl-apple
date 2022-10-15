@@ -5,6 +5,8 @@ OutputLevel.default = .error
 
 print("building openssl - static")
 
+try sh("export OPENSSL_TARGETS='ios-sim-cross-x86_64 ios-sim-cross-arm64 ios64-cross-arm64 ios64-cross-arm64e macos64-x86_64 macos64-arm64 mac-catalyst-x86_64 mac-catalyst-arm64'")
+
 try sh(#"./build-libssl.sh --targets="$OPENSSL_TARGETS" --disable-bitcode"#)
 
 try sh("./create-openssl-framework.sh static")
