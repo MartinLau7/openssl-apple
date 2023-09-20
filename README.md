@@ -5,7 +5,7 @@
 ![macOS Catalyst support](https://img.shields.io/badge/macOS%20Catalyst-10.15+-blue.svg)
 ![watchOS support](https://img.shields.io/badge/watchOS-7.0+-blue.svg)
 ![tvOS support](https://img.shields.io/badge/tvOS-14+-blue.svg)
-![OpenSSL version](https://img.shields.io/badge/OpenSSL-1.1.1l-green.svg)
+![OpenSSL version](https://img.shields.io/badge/OpenSSL-1.1.1w-green.svg)
 [![CI](https://github.com/MartinLau7/openssl-apple/actions/workflows/release.yml/badge.svg)](https://github.com/MartinLau7/openssl-apple/actions/workflows/release.yml)
 [![license](https://img.shields.io/badge/license-Apache%202.0-lightgrey.svg)](LICENSE)
 
@@ -15,16 +15,16 @@ However, this repository focuses more on framework-based setups and also adds ma
 
 # Compile library
 
-Compile OpenSSL 1.1.1l for all targets:
+Compile OpenSSL 1.1.1w for all targets:
 
 ```
-./build-libssl.sh --version=1.1.1l
+./build-libssl.sh --version=1.1.1w
 ```
 
-Compile OpenSSL 1.1.1l for specific targets:
+Compile OpenSSL 1.1.1w for specific targets:
 
 ```
-./build-libssl.sh --version=1.1.1l --targets="ios64-cross-arm64 macos64-x86_64 macos64-arm64"
+./build-libssl.sh --version=1.1.1w --targets="ios64-cross-arm64 macos64-x86_64 macos64-arm64"
 ```
 
 For all options see:

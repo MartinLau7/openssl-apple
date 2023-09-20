@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Debug openssl",
+            "program": "${workspaceFolder:openssl-apple}/.build/debug/openssl",
+            "args": [],
+            "cwd": "${workspaceFolder:openssl-apple}",
+            "preLaunchTask": "swift: Build Debug openssl"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "sourceLanguages": [
+                "swift"
+            ],
+            "name": "Release openssl",
+            "program": "${workspaceFolder:openssl-apple}/.build/release/openssl",
+            "args": [],
+            "cwd": "${workspaceFolder:openssl-apple}",
+            "preLaunchTask": "swift: Build Release openssl"
+        }
+    ]
+}

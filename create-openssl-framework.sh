@@ -98,7 +98,7 @@ function get_min_sdk() {
 #
 # In modern OpenSSL releases the version line looks like this:
 #
-#     # define OPENSSL_VERSION_TEXT    "OpenSSL 1.1.1g  21 Apr 2020"
+#     # define OPENSSL_VERSION_TEXT    "OpenSSL 1.1.1w  21 Apr 2020"
 #
 # But for older versions with FIPS module it may look like this:
 #
@@ -115,9 +115,9 @@ function get_min_sdk() {
 #   'u' = 117 -> 20 + 1 = 21
 #   1.0.221
 #
-#   1.1.1g
-#   'g' = 103 -> 6 + 1 = 07 (zero-padded)
-#   1.1.107
+#   1.1.1w
+#   'w' = 119 -> 6 + 1 = 07 (zero-padded)
+#   1.1.1119
 #
 function get_openssl_version_from_file() {
     local opensslv=$1
